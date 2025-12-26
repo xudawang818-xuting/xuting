@@ -62,7 +62,15 @@ const LoginScreen = ({ onLogin }: { onLogin: (code: string) => void }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onLogin(code);
-    setError(true); // If onLogin doesn't succeed (parent handles logic), this will show error
+    setError(true); 
+  };
+
+  const handleClearCache = () => {
+    if (confirm('⚠️ 警告：这将清空所有本地保存的数据（活动、资源、图片等），用于修复程序卡死或白屏问题。\n\n确定要重置吗？')) {
+      localStorage.clear();
+      alert('缓存已清空，页面将刷新。');
+      window.location.reload();
+    }
   };
 
   return (
@@ -93,7 +101,17 @@ const LoginScreen = ({ onLogin }: { onLogin: (code: string) => void }) => {
             解锁进入
           </button>
         </form>
-        <div className="mt-8 text-xs text-gray-400">
+        
+        <div className="mt-8 border-t border-gray-100 pt-4">
+             <button 
+               onClick={handleClearCache}
+               className="text-xs text-gray-400 hover:text-red-500 underline"
+             >
+               如果页面卡死或白屏，点此重置数据
+             </button>
+        </div>
+
+        <div className="mt-2 text-xs text-gray-400">
           &copy; Green Forest Photography
         </div>
       </div>
@@ -115,35 +133,43 @@ const useSafeStorage = (key: string, data: any) => {
   }, [key, data]);
 };
 
+// Helper to safely load data with try-catch to prevent white screen crashes
+const loadFromStorage = (key: string, initialValue: any) => {
+  try {
+    const saved = localStorage.getItem(key);
+    if (!saved) return initialValue;
+    return JSON.parse(saved);
+  } catch (error) {
+    console.error(`Error loading ${key}, resetting to default.`, error);
+    // If JSON is corrupt (e.g. truncated due to quota), return initial value to avoid crash
+    return initialValue;
+  }
+};
+
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentView, setCurrentView] = useState<'events' | 'resources' | 'schedule' | 'themes' | 'locations' | 'makeup'>('events');
   
-  // Data State
-  const [events, setEvents] = useState<PhotographyEvent[]>(() => {
-    const saved = localStorage.getItem('gf_events');
-    return saved ? JSON.parse(saved) : INITIAL_EVENTS;
-  });
+  // Data State - Now using loadFromStorage helper
+  const [events, setEvents] = useState<PhotographyEvent[]>(() => 
+    loadFromStorage('gf_events', INITIAL_EVENTS)
+  );
 
-  const [resources, setResources] = useState<ResourceItem[]>(() => {
-    const saved = localStorage.getItem('gf_resources');
-    return saved ? JSON.parse(saved) : INITIAL_RESOURCES;
-  });
+  const [resources, setResources] = useState<ResourceItem[]>(() => 
+    loadFromStorage('gf_resources', INITIAL_RESOURCES)
+  );
 
-  const [themePlans, setThemePlans] = useState<ThemePlan[]>(() => {
-    const saved = localStorage.getItem('gf_themes');
-    return saved ? JSON.parse(saved) : [{month: 1, themes: []}];
-  });
+  const [themePlans, setThemePlans] = useState<ThemePlan[]>(() => 
+    loadFromStorage('gf_themes', [{month: 1, themes: []}])
+  );
 
-  const [locations, setLocations] = useState<LocationPartner[]>(() => {
-    const saved = localStorage.getItem('gf_locations');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [locations, setLocations] = useState<LocationPartner[]>(() => 
+    loadFromStorage('gf_locations', [])
+  );
 
-  const [makeupArtists, setMakeupArtists] = useState<MakeupArtist[]>(() => {
-    const saved = localStorage.getItem('gf_makeup');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [makeupArtists, setMakeupArtists] = useState<MakeupArtist[]>(() => 
+    loadFromStorage('gf_makeup', [])
+  );
 
   // Auth Check on Mount
   useEffect(() => {

@@ -1,3 +1,4 @@
+import React from 'react';
 
 export enum ResourceCategory {
   COSTUME = 'COSTUME',
@@ -19,7 +20,7 @@ export interface ResourceItem {
   name: string;
   category: ResourceCategory;
   description: string;
-  imageUrl?: string; // Kept for backward compatibility, but UI will prefer images[0]
+  imageUrl?: string; // Kept for backward compatibility
   images: string[]; // New: Multiple images
   displayAspect: AspectRatio; // New: Display orientation
   totalQuantity: number;
@@ -39,34 +40,7 @@ export interface PhotographyEvent {
   stageManager?: string; 
   organizer?: string; 
   modelCount?: number; 
-  requiredResources: {
-    resourceId: string;
-    quantity: number;
-  }[];
-}
-
-export interface LocationPartner {
-  id: string;
-  name: string;
-  address: string;
-  style: string;
-  contact: string;
-  cost: string;
-  requirements: string;
-  notes: string;
-  imageUrl?: string;
-  images: string[]; // New: Multiple images
-}
-
-export interface MakeupArtist {
-  id: string;
-  name: string;
-  contact: string;
-  baseLocation: string;
-  rates: string;
-  returnRequirements: string;
-  portfolioImages: string[];
-  notes?: string;
+  requiredResources: string[];
 }
 
 export interface ThemeItem {
@@ -82,9 +56,26 @@ export interface ThemePlan {
   themes: ThemeItem[];
 }
 
-export interface TabViewProps {
-  active: boolean;
-  onClick: () => void;
-  label: string;
-  icon: React.ReactNode;
+export interface LocationPartner {
+  id: string;
+  name: string;
+  address: string;
+  style: string;
+  contact: string;
+  cost: string;
+  requirements: string;
+  notes: string;
+  imageUrl: string;
+  images: string[];
+}
+
+export interface MakeupArtist {
+  id: string;
+  name: string;
+  contact: string;
+  baseLocation: string;
+  rates: string;
+  returnRequirements: string;
+  notes: string;
+  portfolioImages: string[];
 }
